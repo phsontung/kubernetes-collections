@@ -1,0 +1,14 @@
+apiVersion: v1
+metadata:
+  name: redis-config
+data:
+  redis.conf: |-
+    tcp-keepalive 300
+    databases 16
+
+    # Disable snapshot (RDB)
+    save ""
+
+    # Disable append log
+    appendonly no
+kind: ConfigMap

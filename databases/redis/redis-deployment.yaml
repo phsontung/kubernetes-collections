@@ -1,0 +1,52 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis-storage
+  labels:
+    app: redisStorage
+spec:
+  template:
+    metadata:
+      labels:
+        app: redisStorage
+        tier: redisCache
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9121"
+    spec:
+      containers:
+        - image: redis:5
+          name: redis
+          command:
+            - redis-server
+            - "/opt/redis/redis.conf"
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: "200Mi"
+              cpu: "100m"
+            limits:
+              memory: "400Mi"
+              cpu: "200m"
+          volumeMounts:
+          - mountPath: /opt/redis
+            name: config
+        - name: redis-exporter
+          image: oliver006/redis_exporter:latest
+          resources:
+            requests:
+              cpu: 50m
+              memory: 100Mi
+            limits:
+              memory: "200Mi"
+              cpu: "100m"
+          ports:
+          - containerPort: 9121
+      volumes:
+        - name: config
+          configMap:
+            name: redis-config
+            items:
+            - key: redis.conf
+              path: redis.conf
